@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 accounts = {}
 @app.get("/balance")
-def getBalance():
+def balance():
     account_id = request.args.get('account_id', '')
     if(account_id in accounts):
         return str(accounts[account_id]['amount'])
@@ -19,30 +19,28 @@ def reset():
 
 @app.post("/event")
 def event():
-    bodyRequest = request.get_json()
-    if(bodyRequest['type'] == 'deposit'):
-        if(bodyRequest['destination'] in accounts):
-            accounts[bodyRequest['destination']]['amount'] += int(bodyRequest['amount'])
+    body = request.get_json()
+    if(body['type'] == 'deposit'):
+        if(body['destination'] in accounts):
+            accounts[body['destination']]['amount'] += int(body['amount'])
         else:
-            accounts[bodyRequest['destination']] = {'amount': int(bodyRequest['amount'])}
-        return {"destination": {"id": bodyRequest['destination'], 'balance': accounts[bodyRequest['destination']]['amount']}}, 201
-    elif(bodyRequest['type'] == 'withdraw'):
-        if(bodyRequest['origin'] in accounts):
-            accounts[bodyRequest['origin']]['amount'] -= int(bodyRequest['amount'])
-            return {"origin": {"id": bodyRequest['origin'], 'balance': accounts[bodyRequest['origin']]['amount']}}, 201
+            accounts[body['destination']] = {'amount': int(body['amount'])}
+        return {"destination": {"id": body['destination'], 'balance': accounts[body['destination']]['amount']}}, 201
+    elif(body['type'] == 'withdraw'):
+        if(body['origin'] in accounts):
+            accounts[body['origin']]['amount'] -= int(body['amount'])
+            return {"origin": {"id": body['origin'], 'balance': accounts[body['origin']]['amount']}}, 201
         else:
             return '0', 404
-    elif(bodyRequest['type'] == 'transfer'):
-        if(bodyRequest['origin'] in accounts):
-            if(bodyRequest['destination'] in accounts):
-                accounts[bodyRequest['origin']]['amount'] -= int(bodyRequest['amount'])
-                accounts[bodyRequest['destination']]['amount'] += int(bodyRequest['amount'])
+    elif(body['type'] == 'transfer'):
+        if(body['origin'] in accounts):
+            if(body['destination'] in accounts):
+                accounts[body['origin']]['amount'] -= int(body['amount'])
+                accounts[body['destination']]['amount'] += int(body['amount'])
             else:
-                accounts[bodyRequest['destination']] = {'amount': int(bodyRequest['amount'])}
-                accounts[bodyRequest['origin']]['amount'] -= int(bodyRequest['amount'])
-            return {"destination": {"id": bodyRequest['destination'], 'balance': accounts[bodyRequest['destination']]['amount']},
-                    "origin": {"id": bodyRequest['origin'], 'balance': accounts[bodyRequest['origin']]['amount']}}, 201
+                accounts[body['destination']] = {'amount': int(body['amount'])}
+                accounts[body['origin']]['amount'] -= int(body['amount'])
+            return {"destination": {"id": body['destination'], 'balance': accounts[body['destination']]['amount']},
+                    "origin": {"id": body['origin'], 'balance': accounts[body['origin']]['amount']}}, 201
         else:
             return '0', 404
-
-#reset - POST
